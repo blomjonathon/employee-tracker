@@ -22,16 +22,48 @@ const db = mysql.createConnection(
 
 async function viewAllDepartments() {
   try {
+    const departmenTable = new Table({});
+
     const results = await new Promise((resolve, reject) => {
       db.query("SELECT * FROM department", function (err, results) {
         if (err) {
           reject(err);
         } else {
           resolve(results);
-          console.log(results)
         }
       });
     });
+    results.forEach((department) => {
+      departmenTable.push([department.id, department.name]);
+    });
+    console.log(departmenTable.toString());
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function viewAllRoles() {
+  try {
+    const rollTable = new Table({});
+
+    const results = await new Promise((resolve, reject) => {
+      db.query("SELECT * FROM role", function (err, results) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+    results.forEach((role) => {
+      rollTable.push([
+        role.id,
+        role.title,
+        role.salary,
+        role.department_id,
+      ]);
+    });
+    console.log(rollTable.toString());
   } catch (error) {
     console.error(error);
   }
@@ -41,26 +73,34 @@ app.use((req, res) => {
   res.status(404).end();
 });
 
-
 inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "selection",
-        message: "What would you like to do?",
-        choices: ["view all departments", "view all roles", 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role'],
-      },
-    ])
-    .then((response) => {
-      if(response.selection == 'view all departments'){
-        viewAllDepartments()
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send("Error processing selection");
-    });
-
+  .prompt([
+    {
+      type: "list",
+      name: "selection",
+      message: "What would you like to do?",
+      choices: [
+        "view all departments",
+        "view all roles",
+        "view all employees",
+        "add a department",
+        "add a role",
+        "add an employee",
+        "update an employee role",
+      ],
+    },
+  ])
+  .then((response) => {
+    if (response.selection == "view all departments") {
+      viewAllDepartments();
+    } else if (response.selection == "view all roles") {
+      viewAllRoles();
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+    res.status(500).send("Error processing selection");
+  });
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
