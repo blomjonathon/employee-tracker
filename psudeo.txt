@@ -9,7 +9,7 @@
     - seed the database with data
 3. create a command line app with inquirer
     - require inquirer
-    - creat prompts for neede info
+    - creat prompts for needed info
     - create functions for various prompts
         - departments.js - getAllDepartments FUNCTION, takes in variable 'add' for when a new department gets added
         - roles.js - getAllRoles FUNCTION, takes in variable 'add' for when a new department gets added

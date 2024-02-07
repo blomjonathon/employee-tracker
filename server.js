@@ -1,41 +1,88 @@
+const figlet = require("figlet");
+const Table = require("cli-table");
+const inquirer = require("inquirer");
+const express = require("express");
+const mysql = require("mysql2");
 
+const PORT = process.env.PORT || 3001;
+const app = express();
 
-const figlet = require('figlet');
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-figlet('Employee', 'Doom', function(err, data) {
-    if (err) {
-        console.log('Something went wrong...');
-        console.dir(err);
-        return;
-    }
-    console.log(data);
-});
-figlet('Manager', 'Doom', function(err, data) {
-    if (err) {
-        console.log('Something went wrong...');
-        console.dir(err);
-        return;
-    }
-    console.log(data);
-});
-
-const Table = require('cli-table');
-
-// Create a new table instance
-const table = new Table({
-    head: ['Name', 'Age', 'Gender'], 
-    colWidths: [20, 10, 10] 
-});
-
-// Add some data to the table
-table.push(
-    ['John Doe', 30, 'Male'],
-    ['Jane Smith', 25, 'Female'],
-    ['Alex Johnson', 40, 'Male']
+const db = mysql.createConnection(
+  {
+    host: "localhost",
+    user: "root",
+    password: "jonathon123",
+    database: "departments_db",
+  },
+  console.log(`Connected to the departments_db database.`)
 );
 
-// Display the table in the console
-console.log(table.toString());
+async function viewAllDepartments() {
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query("SELECT * FROM department", function (err, results) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+          console.log(results)
+        }
+      });
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+app.use((req, res) => {
+  res.status(404).end();
+});
 
 
+inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "selection",
+        message: "What would you like to do?",
+        choices: ["view all departments", "view all roles", 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role'],
+      },
+    ])
+    .then((response) => {
+      if(response.selection == 'view all departments'){
+        viewAllDepartments()
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send("Error processing selection");
+    });
 
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// function createGraphic() {
+//   figlet("Employee", "Doom", function (err, data) {
+//     if (err) {
+//       console.log("Something went wrong...");
+//       console.dir(err);
+//       return;
+//     }
+//     console.log(data);
+//   });
+//   figlet("Manager", "Doom", function (err, data) {
+//     if (err) {
+//       console.log("Something went wrong...");
+//       console.dir(err);
+//       return;
+//     }
+//     console.log(data);
+//   });
+// }
+
+// createGraphic()
