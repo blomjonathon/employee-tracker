@@ -17,11 +17,10 @@ CREATE TABLE role (
 );
 
 CREATE TABLE employee (
-    id INT,
+    id INT PRIMARY KEY,
     fname VARCHAR(30),
     lname VARCHAR(30),
-    rol_id INT,
-    manager_id INT
+    role_id INT,
+    manager_id INT 
 );
-
 

@@ -22,7 +22,7 @@ const db = mysql.createConnection(
 
 async function viewAllDepartments() {
   try {
-    const departmenTable = new Table({});
+    const departmentTable = new Table({});
 
     const results = await new Promise((resolve, reject) => {
       db.query("SELECT * FROM department", function (err, results) {
@@ -34,17 +34,17 @@ async function viewAllDepartments() {
       });
     });
     results.forEach((department) => {
-      departmenTable.push([department.id, department.name]);
+      departmentTable.push([department.id, department.name]);
     });
-    console.log(departmenTable.toString());
+    console.log(departmentTable.toString());
+    prompt();
   } catch (error) {
     console.error(error);
   }
 }
-
 async function viewAllRoles() {
   try {
-    const rollTable = new Table({});
+    const roleTable = new Table({});
 
     const results = await new Promise((resolve, reject) => {
       db.query("SELECT * FROM role", function (err, results) {
@@ -56,51 +56,82 @@ async function viewAllRoles() {
       });
     });
     results.forEach((role) => {
-      rollTable.push([
-        role.id,
-        role.title,
-        role.salary,
-        role.department_id,
+      roleTable.push([role.id, role.title, role.salary, role.department_id]);
+    });
+    console.log(roleTable.toString());
+    prompt();
+  } catch (error) {
+    console.error(error);
+  }
+}
+async function viewAllEmployees() {
+  try {
+    const employeeTable = new Table({});
+
+    const results = await new Promise((resolve, reject) => {
+      db.query("SELECT * FROM employee", function (err, results) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+    results.forEach((employee) => {
+      employeeTable.push([
+        employee.id,
+        employee.fname,
+        employee.lname,
+        employee.role_id,
+        employee.manager_id,
       ]);
     });
-    console.log(rollTable.toString());
+    console.log(employeeTable)
+    console.log(employeeTable.toString());
+    prompt();
   } catch (error) {
     console.error(error);
   }
 }
 
+function prompt() {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "selection",
+        message: "What would you like to do?",
+        choices: [
+          "view all departments",
+          "view all roles",
+          "view all employees",
+          "add a department",
+          "add a role",
+          "add an employee",
+          "update an employee role",
+        ],
+      },
+    ])
+    .then((response) => {
+      if (response.selection == "view all departments") {
+        viewAllDepartments();
+      } else if (response.selection == "view all roles") {
+        viewAllRoles();
+      } else if (response.selection == "view all employees") {
+        viewAllEmployees();
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send("Error processing selection");
+    });
+}
+
+prompt();
+
 app.use((req, res) => {
   res.status(404).end();
 });
-
-inquirer
-  .prompt([
-    {
-      type: "list",
-      name: "selection",
-      message: "What would you like to do?",
-      choices: [
-        "view all departments",
-        "view all roles",
-        "view all employees",
-        "add a department",
-        "add a role",
-        "add an employee",
-        "update an employee role",
-      ],
-    },
-  ])
-  .then((response) => {
-    if (response.selection == "view all departments") {
-      viewAllDepartments();
-    } else if (response.selection == "view all roles") {
-      viewAllRoles();
-    }
-  })
-  .catch((error) => {
-    console.error(error);
-    res.status(500).send("Error processing selection");
-  });
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
