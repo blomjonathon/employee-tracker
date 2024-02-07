@@ -1,0 +1,17 @@
+
+1. find npm package for display of table and also the cool lines picture thing in the readme screenshot
+
+2. create database using SQL with employees, departments, roles
+    - departments table
+    - employee table
+    - role table
+
+    - seed the database with data
+3. create a command line app with inquirer
+    - require inquirer
+    - creat prompts for neede info
+    - create functions for various prompts
+        - departments.js - getAllDepartments FUNCTION, takes in variable 'add' for when a new department gets added
+        - roles.js - getAllRoles FUNCTION, takes in variable 'add' for when a new department gets added
+        - employees.js - getAllEmployess FUNCTION, takes in variable 'add' for when a new department gets added
+4. export and require all files needed
