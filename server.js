@@ -150,7 +150,7 @@ async function getDepartmentNamesandIds() {
   }
 }
 
-async function getManagerNameandId() {
+async function getEmployeesObj() {
   try {
     const results = await new Promise((resolve, reject) => {
       db.query(
@@ -256,9 +256,8 @@ function prompt() {
             addRole(response.newRole, response.newSalary, filteredObj[0].id);
           });
       } else if (response.selection == "add an employee") {
-        const newEmployeeManagerObj = await getManagerNameandId();
+        const newEmployeeManagerObj = await getEmployeesObj();
         const rolesObj = await getRoles()
-        console.log(rolesObj)
         inquirer
           .prompt([
             {
@@ -297,6 +296,48 @@ function prompt() {
               employeeFilter[0].manager_id
             );
           });
+      } else if (response.selection == 'update an employee role') {
+        const employeeList = await getEmployeesObj()
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "updateEmployeeRole",
+              message: "Which employee's role do you want to update?",
+              choices: employeeList.map((employee) => employee.fname)
+            },
+            // {
+            //   type: "input",
+            //   name: "newEmployeeLname",
+            //   message: "What is the last name of the employee?",
+            // },
+            // {
+            //   type: "list",
+            //   name: "newEmployeeRole",
+            //   message: "What is employee's role?",
+            //   choices: rolesObj.map((role) => role.title)
+            // },
+            // {
+            //   type: "list",
+            //   name: "newEmployeeManager",
+            //   message: "Who is the employee's manager?",
+            //   choices: newEmployeeManagerObj.map((employee) => employee.fname),
+            // },
+          ])
+          .then((response) => {
+            let employeeFilter = newEmployeeManagerObj.filter(
+              (employee) => employee.fname === response.newEmployeeManager
+            );
+            let roleFilter = rolesObj[0].id
+            console.log(roleFilter)
+            addEmployee(
+              response.newEmployeeFname,
+              response.newEmployeeLname,
+              roleFilter,
+              employeeFilter[0].manager_id
+            );
+          });
+      } else if (response.selection == 'update an employee role') {
       }
     })
     .catch((error) => {
