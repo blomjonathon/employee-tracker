@@ -343,11 +343,14 @@ function prompt() {
               type: "list",
               name: "updateEmployeeRole",
               message: "Which employee's role do you want to update?",
-              choices: employeeList.map((employee) => employee.role_id)
+              choices: employeeList.map((employee) => employee.fname)
             },
           ])
           .then((response) => {
-            updateEmployee(response.updateEmployee, response.updatEmployeeRole)
+            const selectedEmployee = employeeList.find((employee) => employee.fname === response.updateEmployee);
+            const selectedRole = rolesObj.find((role) => role.title === response.updateEmployeeRole);
+
+            updateEmployee(selectedEmployee, selectedRole.id)
           });
       } 
     })
