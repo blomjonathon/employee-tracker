@@ -119,9 +119,9 @@ function addRole(addRole, addSalary, addRoleDepartment) {
     }
   );
 }
-function addEmployee(addFname, addLname, mId) {
+function addEmployee(addFname, addLname, roleId, mId) {
   db.query(
-    `INSERT INTO employee (fname, lname, manager_id) VALUES ('${addFname}', '${addLname}', '${mId}')`,
+    `INSERT INTO employee (fname, lname, role_id, manager_id) VALUES ('${addFname}', '${addLname}', '${roleId}','${mId}')`,
     function (err, results) {
       if (err) {
         console.error(err);
@@ -153,13 +153,36 @@ async function getDepartmentNamesandIds() {
 async function getManagerNameandId() {
   try {
     const results = await new Promise((resolve, reject) => {
-      db.query("SELECT fname, lname, manager_id FROM employee", function (err, results) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(results);
+      db.query(
+        "SELECT fname, lname, role_id, manager_id FROM employee",
+        function (err, results) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
         }
-      });
+      );
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+async function getRoles(){
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT id, title FROM role",
+        function (err, results) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        }
+      );
     });
     return results;
   } catch (error) {
@@ -234,6 +257,8 @@ function prompt() {
           });
       } else if (response.selection == "add an employee") {
         const newEmployeeManagerObj = await getManagerNameandId();
+        const rolesObj = await getRoles()
+        console.log(rolesObj)
         inquirer
           .prompt([
             {
@@ -247,9 +272,10 @@ function prompt() {
               message: "What is the last name of the employee?",
             },
             {
-              type: "input",
+              type: "list",
               name: "newEmployeeRole",
               message: "What is employee's role?",
+              choices: rolesObj.map((role) => role.title)
             },
             {
               type: "list",
@@ -259,14 +285,16 @@ function prompt() {
             },
           ])
           .then((response) => {
-            let filteredObj = newEmployeeManagerObj.filter(
+            let employeeFilter = newEmployeeManagerObj.filter(
               (employee) => employee.fname === response.newEmployeeManager
             );
-            console.log(response.newEmployeeFname, response.newEmployeeLname, filteredObj[0].manager_id)
+            let roleFilter = rolesObj[0].id
+            console.log(roleFilter)
             addEmployee(
               response.newEmployeeFname,
               response.newEmployeeLname,
-              filteredObj[0].manager_id
+              roleFilter,
+              employeeFilter[0].manager_id
             );
           });
       }
