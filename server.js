@@ -174,7 +174,40 @@ async function getRoles(){
   try {
     const results = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT id, title FROM role",
+        "SELECT id FROM role",
+        function (err, results) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        }
+      );
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+function updateEmployee(employee, employeeRole){
+  db.query(
+    `INSERT INTO employee (fname, role_id) VALUES ('${employee}', '${employeeRole}')`,
+    function (err, results) {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log("employee updated successfully!");
+        prompt();
+      }
+    }
+  );
+}
+async function getRoleIds (){
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT id FROM role",
         function (err, results) {
           if (err) {
             reject(err);
@@ -210,6 +243,7 @@ function prompt() {
       },
     ])
     .then(async (response) => {
+      const rolesObj = await getRoles()
       if (response.selection == "view all departments") {
         viewAllDepartments();
       } else if (response.selection == "view all roles") {
@@ -257,7 +291,6 @@ function prompt() {
           });
       } else if (response.selection == "add an employee") {
         const newEmployeeManagerObj = await getEmployeesObj();
-        const rolesObj = await getRoles()
         inquirer
           .prompt([
             {
@@ -302,43 +335,21 @@ function prompt() {
           .prompt([
             {
               type: "list",
-              name: "updateEmployeeRole",
+              name: "updateEmployee",
               message: "Which employee's role do you want to update?",
               choices: employeeList.map((employee) => employee.fname)
             },
-            // {
-            //   type: "input",
-            //   name: "newEmployeeLname",
-            //   message: "What is the last name of the employee?",
-            // },
-            // {
-            //   type: "list",
-            //   name: "newEmployeeRole",
-            //   message: "What is employee's role?",
-            //   choices: rolesObj.map((role) => role.title)
-            // },
-            // {
-            //   type: "list",
-            //   name: "newEmployeeManager",
-            //   message: "Who is the employee's manager?",
-            //   choices: newEmployeeManagerObj.map((employee) => employee.fname),
-            // },
+            {
+              type: "list",
+              name: "updateEmployeeRole",
+              message: "Which employee's role do you want to update?",
+              choices: employeeList.map((employee) => employee.role_id)
+            },
           ])
           .then((response) => {
-            let employeeFilter = newEmployeeManagerObj.filter(
-              (employee) => employee.fname === response.newEmployeeManager
-            );
-            let roleFilter = rolesObj[0].id
-            console.log(roleFilter)
-            addEmployee(
-              response.newEmployeeFname,
-              response.newEmployeeLname,
-              roleFilter,
-              employeeFilter[0].manager_id
-            );
+            updateEmployee(response.updateEmployee, response.updatEmployeeRole)
           });
-      } else if (response.selection == 'update an employee role') {
-      }
+      } 
     })
     .catch((error) => {
       console.error(error);
