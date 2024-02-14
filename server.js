@@ -37,17 +37,6 @@ async function viewAllDepartments() {
   }
 }
 
-function getDepartmentNames() {
-  db.query(`SELECT name FROM department`, function (err, results) {
-    if (err) {
-      console.error(err);
-      return callback(err, null);
-    }
-    const departmentNames = results.map(obj => obj.name);
-    console.log(departmentNames)
-  });
-}
-
 async function viewAllRoles() {
   try {
     const roleTable = new Table({
@@ -75,7 +64,7 @@ async function viewAllRoles() {
 async function viewAllEmployees() {
   try {
     const employeeTable = new Table({
-      head: ["id", "fname", "lname", "role_id", "department_id"],
+      head: ["id", "fname", "lname", "role_id", "manager_id"],
     });
 
     const results = await new Promise((resolve, reject) => {
@@ -130,6 +119,54 @@ function addRole(addRole, addSalary, addRoleDepartment) {
     }
   );
 }
+function addEmployee(addFname, addLname, mId) {
+  db.query(
+    `INSERT INTO employee (fname, lname, manager_id) VALUES ('${addFname}', '${addLname}', '${mId}')`,
+    function (err, results) {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log("employee added successfully!");
+        prompt();
+      }
+    }
+  );
+}
+async function getDepartmentNamesandIds() {
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query("SELECT id, name FROM department", function (err, results) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+async function getManagerNameandId() {
+  try {
+    const results = await new Promise((resolve, reject) => {
+      db.query("SELECT fname, lname, manager_id FROM employee", function (err, results) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
 function prompt() {
   inquirer
@@ -149,7 +186,7 @@ function prompt() {
         ],
       },
     ])
-    .then((response) => {
+    .then(async (response) => {
       if (response.selection == "view all departments") {
         viewAllDepartments();
       } else if (response.selection == "view all roles") {
@@ -169,6 +206,7 @@ function prompt() {
             addDepartment(response.newDepartment);
           });
       } else if (response.selection == "add a role") {
+        const departmentObj = await getDepartmentNamesandIds();
         inquirer
           .prompt([
             {
@@ -185,14 +223,50 @@ function prompt() {
               type: "list",
               name: "newRoleDepartment",
               message: "Which department will this role be in?",
-              choices: getDepartmentNames(),
+              choices: departmentObj.map((department) => department.name),
             },
           ])
           .then((response) => {
-            addRole(
-              response.newRole,
-              response.newSalary,
-              response.newRoleDepartment
+            let filteredObj = departmentObj.filter(
+              (department) => department.name === response.newRoleDepartment
+            );
+            addRole(response.newRole, response.newSalary, filteredObj[0].id);
+          });
+      } else if (response.selection == "add an employee") {
+        const newEmployeeManagerObj = await getManagerNameandId();
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "newEmployeeFname",
+              message: "What is the first name of the employee?",
+            },
+            {
+              type: "input",
+              name: "newEmployeeLname",
+              message: "What is the last name of the employee?",
+            },
+            {
+              type: "input",
+              name: "newEmployeeRole",
+              message: "What is employee's role?",
+            },
+            {
+              type: "list",
+              name: "newEmployeeManager",
+              message: "Who is the employee's manager?",
+              choices: newEmployeeManagerObj.map((employee) => employee.fname),
+            },
+          ])
+          .then((response) => {
+            let filteredObj = newEmployeeManagerObj.filter(
+              (employee) => employee.fname === response.newEmployeeManager
+            );
+            console.log(response.newEmployeeFname, response.newEmployeeLname, filteredObj[0].manager_id)
+            addEmployee(
+              response.newEmployeeFname,
+              response.newEmployeeLname,
+              filteredObj[0].manager_id
             );
           });
       }
@@ -202,5 +276,4 @@ function prompt() {
       res.status(500).send("Error processing selection");
     });
 }
-// prompt()
-console.log(getDepartmentNames());
+prompt();

@@ -13,14 +13,14 @@ CREATE TABLE role (
     id INT PRIMARY KEY,
     title VARCHAR(30),
     salary DECIMAL,
-    department_id INT
+    department_id INT NOT NULL
 );
 
 CREATE TABLE employee (
     id INT PRIMARY KEY,
     fname VARCHAR(30),
     lname VARCHAR(30),
-    role_id INT,
-    manager_id INT 
+    role_id INT NOT NULL,
+    manager_id INT NOT NULL
 );
 
