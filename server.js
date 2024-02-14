@@ -174,7 +174,7 @@ async function getRoles(){
   try {
     const results = await new Promise((resolve, reject) => {
       db.query(
-        "SELECT id FROM role",
+        "SELECT id, title FROM role",
         function (err, results) {
           if (err) {
             reject(err);
@@ -202,26 +202,6 @@ function updateEmployee(employee, employeeRole){
       }
     }
   );
-}
-async function getRoleIds (){
-  try {
-    const results = await new Promise((resolve, reject) => {
-      db.query(
-        "SELECT id FROM role",
-        function (err, results) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(results);
-          }
-        }
-      );
-    });
-    return results;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
 }
 
 function prompt() {
@@ -342,15 +322,15 @@ function prompt() {
             {
               type: "list",
               name: "updateEmployeeRole",
-              message: "Which employee's role do you want to update?",
-              choices: employeeList.map((employee) => employee.fname)
-            },
+              message: "Which role will the new employee have?",
+              choices: rolesObj.map((role) => role.title)
+            }
           ])
           .then((response) => {
             const selectedEmployee = employeeList.find((employee) => employee.fname === response.updateEmployee);
             const selectedRole = rolesObj.find((role) => role.title === response.updateEmployeeRole);
-
-            updateEmployee(selectedEmployee, selectedRole.id)
+            
+            updateEmployee(selectedEmployee.fname, selectedRole.id)
           });
       } 
     })
