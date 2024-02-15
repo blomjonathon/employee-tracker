@@ -193,7 +193,7 @@ async function getRoles(){
 
 function updateEmployee(employeeId, newRoleId) {
   db.query(
-    `UPDATE employee SET role_id = ${newRoleId} WHERE fname = ${employeeId}`,
+    `UPDATE employee SET role_id = ${newRoleId} WHERE fname = '${employeeId}'`,
     function (err, results) {
       if (err) {
         console.error(err);
