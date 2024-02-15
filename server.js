@@ -190,19 +190,35 @@ async function getRoles(){
     throw error;
   }
 }
-function updateEmployee(employee, employeeRole){
+
+function updateEmployee(employeeId, newRoleId) {
   db.query(
-    `INSERT INTO employee (fname, role_id) VALUES ('${employee}', '${employeeRole}')`,
+    `UPDATE employee SET role_id = ${newRoleId} WHERE fname = ${employeeId}`,
     function (err, results) {
       if (err) {
         console.error(err);
       } else {
-        console.log("employee updated successfully!");
+        console.log("Employee role updated successfully!");
         prompt();
       }
     }
   );
 }
+
+
+// function updateEmployee(employee, employeeRole){
+//   db.query(
+//     `INSERT INTO employee (fname, role_id) VALUES ('${employee}', '${employeeRole}')`,
+//     function (err, results) {
+//       if (err) {
+//         console.error(err);
+//       } else {
+//         console.log("employee updated successfully!");
+//         prompt();
+//       }
+//     }
+//   );
+// }
 
 function prompt() {
   inquirer
