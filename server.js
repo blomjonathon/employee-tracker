@@ -4,10 +4,10 @@ const mysql = require("mysql2");
 
 const db = mysql.createConnection(
   {
-    host: "localhost",
-    user: "root",
-    password: "jonathon123",
-    database: "departments_db",
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "jonathon123",
+    database: process.env.DB_NAME || "departments_db",
   },
   console.log(`Connected to the departments_db database.`)
 );
@@ -61,6 +61,7 @@ async function viewAllRoles() {
     console.error(error);
   }
 }
+
 async function viewAllEmployees() {
   try {
     const employeeTable = new Table({
@@ -113,12 +114,13 @@ function addRole(addRole, addSalary, addRoleDepartment) {
       if (err) {
         console.error(err);
       } else {
-        console.log("role added successfully!");
+        console.log("Role added successfully!");
         prompt();
       }
     }
   );
 }
+
 function addEmployee(addFname, addLname, roleId, mId) {
   db.query(
     `INSERT INTO employee (fname, lname, role_id, manager_id) VALUES ('${addFname}', '${addLname}', '${roleId}','${mId}')`,
@@ -126,12 +128,13 @@ function addEmployee(addFname, addLname, roleId, mId) {
       if (err) {
         console.error(err);
       } else {
-        console.log("employee added successfully!");
+        console.log("Employee added successfully!");
         prompt();
       }
     }
   );
 }
+
 async function getDepartmentNamesandIds() {
   try {
     const results = await new Promise((resolve, reject) => {
@@ -170,7 +173,8 @@ async function getEmployeesObj() {
     throw error;
   }
 }
-async function getRoles(){
+
+async function getRoles() {
   try {
     const results = await new Promise((resolve, reject) => {
       db.query(
